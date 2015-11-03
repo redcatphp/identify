@@ -12,7 +12,7 @@
  * @version    Build @@version@@
  */
 
-namespace Wild\Identify\SecurityLib;
+namespace RedCat\Identify\SecurityLib;
 
 /**
  * The strength FlyweightEnum class

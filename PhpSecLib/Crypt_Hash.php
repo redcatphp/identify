@@ -1,4 +1,4 @@
-<?php namespace Wild\Identify\PhpSecLib;
+<?php namespace RedCat\Identify\PhpSecLib;
 
 /**
  * Pure-PHP implementations of keyed-hash message authentication codes (HMACs) and various cryptographic hashing functions.

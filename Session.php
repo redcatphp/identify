@@ -1,5 +1,5 @@
 <?php
-namespace Wild\Identify;
+namespace RedCat\Identify;
 class Session{
 	private $id;
 	private $key;
@@ -368,14 +368,14 @@ class Session{
 	}
 	function getSuffixHref(){
 		if(!isset($this->suffixHref)){
-			if(isset($this->server['SURIKAT_URI'])){
-				$this->suffixHref = $this->server['SURIKAT_URI'];
+			if(isset($this->server['REDCAT_URI'])){
+				$this->suffixHref = $this->server['REDCAT_URI'];
 			}
 			else{
 				$docRoot = $this->server['DOCUMENT_ROOT'].'/';
 				//$docRoot = dirname($this->server['SCRIPT_FILENAME']).'/';
-				if(defined('SURIKAT_CWD'))
-					$cwd = SURIKAT_CWD;
+				if(defined('REDCAT_CWD'))
+					$cwd = REDCAT_CWD;
 				else
 					$cwd = getcwd();
 				if($docRoot!=$cwd&&strpos($cwd,$docRoot)===0)

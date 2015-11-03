@@ -6,7 +6,7 @@
  *
  * PHP version 5.3
  *
- * @category   PHPWild\Identify\SecurityLib
+ * @category   PHPRedCat\Identify\SecurityLib
  * @package    Core
  * @author     Anthony Ferrara <ircmaxell@ircmaxell.com>
  * @copyright  2011 The Authors
@@ -14,13 +14,13 @@
  * @version    Build @@version@@
  */
 
-namespace Wild\Identify\SecurityLib;
+namespace RedCat\Identify\SecurityLib;
 
 /**
  * A Utility class for converting between raw binary strings and a given
  * list of characters
  *
- * @category   PHPWild\Identify\SecurityLib
+ * @category   PHPRedCat\Identify\SecurityLib
  * @package    Core
  * @author     Anthony Ferrara <ircmaxell@ircmaxell.com>
  */

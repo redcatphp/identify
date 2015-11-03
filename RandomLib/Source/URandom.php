@@ -15,9 +15,9 @@
  * @version    Build @@version@@
  */
 
-namespace Wild\Identify\RandomLib\Source;
+namespace RedCat\Identify\RandomLib\Source;
 
-use Wild\Identify\SecurityLib\Strength;
+use RedCat\Identify\SecurityLib\Strength;
 
 /**
  * The URandom Random Number Source
@@ -30,7 +30,7 @@ use Wild\Identify\SecurityLib\Strength;
  * @author     Anthony Ferrara <ircmaxell@ircmaxell.com>
  * @codeCoverageIgnore
  */
-class URandom implements \Wild\Identify\RandomLib\Source {
+class URandom implements \RedCat\Identify\RandomLib\Source {
 
     /**
      * @var string The file to read from

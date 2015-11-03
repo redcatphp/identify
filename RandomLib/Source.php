@@ -14,7 +14,7 @@
  * @version    Build @@version@@
  */
 
-namespace Wild\Identify\RandomLib;
+namespace RedCat\Identify\RandomLib;
 
 /**
  * The Random Number Source interface.

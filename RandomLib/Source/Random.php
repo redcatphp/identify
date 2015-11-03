@@ -15,9 +15,9 @@
  * @version    Build @@version@@
  */
 
-namespace Wild\Identify\RandomLib\Source;
+namespace RedCat\Identify\RandomLib\Source;
 
-use Wild\Identify\SecurityLib\Strength;
+use RedCat\Identify\SecurityLib\Strength;
 
 /**
  * The Random Random Number Source

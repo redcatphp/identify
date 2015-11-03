@@ -1,5 +1,5 @@
-<?php namespace Wild\Identify;
-use Wild\Identify\Auth;
+<?php namespace RedCat\Identify;
+use RedCat\Identify\Auth;
 class AuthServer{
 	protected $messages;
 	protected $lastResult;
@@ -439,13 +439,13 @@ class AuthServer{
 	}
 	function getSuffixHref(){
 		if(!isset($this->suffixHref)){
-			if(isset($this->server['SURIKAT_URI'])){
-				$this->suffixHref = ltrim($this->server['SURIKAT_URI'],'/');				
+			if(isset($this->server['REDCAT_URI'])){
+				$this->suffixHref = ltrim($this->server['REDCAT_URI'],'/');				
 			}
 			else{
 				$docRoot = $this->server['DOCUMENT_ROOT'].'/';
-				if(defined('SURIKAT_CWD'))
-					$cwd = SURIKAT_CWD;
+				if(defined('REDCAT_CWD'))
+					$cwd = REDCAT_CWD;
 				else
 					$cwd = getcwd();
 				if($docRoot!=$cwd&&strpos($cwd,$docRoot)===0)

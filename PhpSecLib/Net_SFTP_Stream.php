@@ -1,4 +1,4 @@
-<?php namespace Wild\Identify\PhpSecLib;
+<?php namespace RedCat\Identify\PhpSecLib;
 
 /**
  * SFTP Stream Wrapper

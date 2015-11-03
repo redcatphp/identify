@@ -12,7 +12,7 @@
  * @license    http://www.opensource.org/licenses/mit-license.html  MIT License
  * @version    Build @@version@@
  */
-namespace Wild\Identify\SecurityLib\BigMath;
+namespace RedCat\Identify\SecurityLib\BigMath;
 
 /**
  * A class for arbitrary precision math functions implemented using bcmath
@@ -21,7 +21,7 @@ namespace Wild\Identify\SecurityLib\BigMath;
  * @package    Core
  * @subpackage BigMath
  */
-class BCMath extends \Wild\Identify\SecurityLib\BigMath {
+class BCMath extends \RedCat\Identify\SecurityLib\BigMath {
 
     /**
      * Add two numbers together

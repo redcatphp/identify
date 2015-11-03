@@ -1,4 +1,4 @@
-<?php namespace Wild\Identify\PHPMailer;
+<?php namespace RedCat\Identify\PHPMailer;
 use Exception;
 /**
  * PHPMailer POP-Before-SMTP Authentication Class.

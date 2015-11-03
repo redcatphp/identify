@@ -6,11 +6,11 @@
  * @version 1.3
  * @link http://github.com/surikat/Identify/
  * @author Jo Surikat <jo@surikat.pro>
- * @website http://wildsurikat.com
+ * @website http://redcatphp.com
  */
-namespace Wild\Identify;
-use Wild\DataMap\B;
-use Wild\DataMap\DataSource;
+namespace RedCat\Identify;
+use RedCat\DataMap\B;
+use RedCat\DataMap\DataSource;
 if (version_compare(phpversion(), '5.5.0', '<')){
 	require_once __DIR__.'/password-compat.inc.php';
 }
@@ -137,7 +137,7 @@ class Auth{
 		if(!$Session)
 			$Session = new Session();
 		$this->Session = $Session;
-		if(!isset($db)&&class_exists('Wild\DataMap\B')){
+		if(!isset($db)&&class_exists('RedCat\DataMap\B')){
 			$this->db = B::getDatabase();
 		}
 		$this->siteUrl = $this->getBaseHref();
@@ -677,13 +677,13 @@ class Auth{
 		$name = $_SERVER['SERVER_NAME'];
 		$ssl = isset($_SERVER["HTTPS"])&&$_SERVER["HTTPS"]==="on";
 		$port = isset($_SERVER['SERVER_PORT'])&&$_SERVER['SERVER_PORT']&&((!$ssl&&(int)$_SERVER['SERVER_PORT']!=80)||($ssl&&(int)$_SERVER['SERVER_PORT']!=443))?':'.$_SERVER['SERVER_PORT']:'';
-		if(isset($_SERVER['SURIKAT_URI'])){
-			$suffixHref = ltrim($_SERVER['SURIKAT_URI'],'/');
+		if(isset($_SERVER['REDCAT_URI'])){
+			$suffixHref = ltrim($_SERVER['REDCAT_URI'],'/');
 		}
 		else{
 			$docRoot = $_SERVER['DOCUMENT_ROOT'].'/';
-			if(defined('SURIKAT_CWD'))
-				$cwd = SURIKAT_CWD;
+			if(defined('REDCAT_CWD'))
+				$cwd = REDCAT_CWD;
 			else
 				$cwd = getcwd();
 			if($docRoot!=$cwd&&strpos($cwd,$docRoot)===0)

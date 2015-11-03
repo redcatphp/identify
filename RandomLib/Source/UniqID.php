@@ -16,10 +16,10 @@
  * @version    Build @@version@@
  */
 
-namespace Wild\Identify\RandomLib\Source;
+namespace RedCat\Identify\RandomLib\Source;
 
-use Wild\Identify\SecurityLib\Strength;
-use Wild\Identify\SecurityLib\Util;
+use RedCat\Identify\SecurityLib\Strength;
+use RedCat\Identify\SecurityLib\Util;
 
 /**
  * The UniqID Random Number Source
@@ -33,7 +33,7 @@ use Wild\Identify\SecurityLib\Util;
  * @author     Anthony Ferrara <ircmaxell@ircmaxell.com>
  * @codeCoverageIgnore
  */
-class UniqID implements \Wild\Identify\RandomLib\Source {
+class UniqID implements \RedCat\Identify\RandomLib\Source {
 
     /**
      * Return an instance of Strength indicating the strength of the source

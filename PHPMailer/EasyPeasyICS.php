@@ -1,4 +1,4 @@
-<?php namespace Wild\Identify\PHPMailer;
+<?php namespace RedCat\Identify\PHPMailer;
 /**
  * EasyPeasyICS Simple ICS/vCal data generator.
  * @author Marcus Bointon <phpmailer@synchromedia.co.uk>

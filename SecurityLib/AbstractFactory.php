@@ -12,7 +12,7 @@
  * @version   Build @@version@@
  */
 
-namespace Wild\Identify\SecurityLib;
+namespace RedCat\Identify\SecurityLib;
 
 /**
  * The base abstract factory used by all PasswordLib factories

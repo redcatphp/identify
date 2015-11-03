@@ -4,7 +4,7 @@
  *
  * PHP version 5.3
  *
- * @category  PHPWild\Identify\SecurityLib
+ * @category  PHPRedCat\Identify\SecurityLib
  * @package   Random
  * @author    Anthony Ferrara <ircmaxell@ircmaxell.com>
  * @copyright 2011 The Authors
@@ -12,17 +12,17 @@
  * @version   Build @@version@@
  */
 
-namespace Wild\Identify\RandomLib;
+namespace RedCat\Identify\RandomLib;
 
 /**
  * An abstract mixer to implement a common mixing strategy
  *
  * @see      http://tools.ietf.org/html/rfc4086#section-5.2
- * @category PHPWild\Identify\SecurityLib
+ * @category PHPRedCat\Identify\SecurityLib
  * @package  Random
  * @author   Anthony Ferrara <ircmaxell@ircmaxell.com>
  */
-abstract class AbstractMixer implements \Wild\Identify\RandomLib\Mixer {
+abstract class AbstractMixer implements \RedCat\Identify\RandomLib\Mixer {
 
     /**
      * Get the block size (the size of the individual blocks used for the mixing)

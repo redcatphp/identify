@@ -11,7 +11,7 @@
  * @license    http://www.opensource.org/licenses/mit-license.html  MIT License
  * @version    Build @@version@@
  */
-namespace Wild\Identify\SecurityLib;
+namespace RedCat\Identify\SecurityLib;
 
 /**
  * A class for arbitrary precision math functions
@@ -33,11 +33,11 @@ abstract class BigMath {
     public static function createFromServerConfiguration() {
         //@codeCoverageIgnoreStart
         if (extension_loaded('gmp')) {
-            return new \Wild\Identify\SecurityLib\BigMath\GMP();
+            return new \RedCat\Identify\SecurityLib\BigMath\GMP();
         } elseif (extension_loaded('bcmath')) {
-            return new \Wild\Identify\SecurityLib\BigMath\BCMath();
+            return new \RedCat\Identify\SecurityLib\BigMath\BCMath();
         } else {
-            return new \Wild\Identify\SecurityLib\BigMath\PHPMath();
+            return new \RedCat\Identify\SecurityLib\BigMath\PHPMath();
         }
         //@codeCoverageIgnoreEnd
     }

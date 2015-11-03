@@ -1,4 +1,4 @@
-<?php namespace Wild\Identify;
+<?php namespace RedCat\Identify;
 class SessionHandler implements SessionHandlerInterface{
 	protected $name;
 	protected $savePath;

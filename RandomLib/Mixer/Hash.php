@@ -17,10 +17,10 @@
  * @version    Build @@version@@
  */
 
-namespace Wild\Identify\RandomLib\Mixer;
+namespace RedCat\Identify\RandomLib\Mixer;
 
-use \Wild\Identify\SecurityLib\Strength;
-use \Wild\Identify\SecurityLib\Util;
+use \RedCat\Identify\SecurityLib\Strength;
+use \RedCat\Identify\SecurityLib\Util;
 
 /**
  * The Hash medium strength mixer class
@@ -34,7 +34,7 @@ use \Wild\Identify\SecurityLib\Util;
  * @subpackage Mixer
  * @author     Anthony Ferrara <ircmaxell@ircmaxell.com>
  */
-class Hash extends \Wild\Identify\RandomLib\AbstractMixer {
+class Hash extends \RedCat\Identify\RandomLib\AbstractMixer {
 
     /**
      * @var string The hash instance to use

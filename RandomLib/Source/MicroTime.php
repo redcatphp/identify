@@ -17,10 +17,10 @@
  * @version    Build @@version@@
  */
 
-namespace Wild\Identify\RandomLib\Source;
+namespace RedCat\Identify\RandomLib\Source;
 
-use Wild\Identify\SecurityLib\Strength;
-use Wild\Identify\SecurityLib\Util;
+use RedCat\Identify\SecurityLib\Strength;
+use RedCat\Identify\SecurityLib\Util;
 
 /**
  * The Microtime Random Number Source
@@ -35,7 +35,7 @@ use Wild\Identify\SecurityLib\Util;
  * @author     Anthony Ferrara <ircmaxell@ircmaxell.com>
  * @codeCoverageIgnore
  */
-final class MicroTime implements \Wild\Identify\RandomLib\Source {
+final class MicroTime implements \RedCat\Identify\RandomLib\Source {
 
     /**
      * A static counter to ensure unique hashes and prevent state collisions

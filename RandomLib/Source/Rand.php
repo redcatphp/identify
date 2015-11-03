@@ -17,9 +17,9 @@
  * @version    Build @@version@@
  */
 
-namespace Wild\Identify\RandomLib\Source;
+namespace RedCat\Identify\RandomLib\Source;
 
-use Wild\Identify\SecurityLib\Strength;
+use RedCat\Identify\SecurityLib\Strength;
 
 /**
  * The Rand Random Number Source
@@ -34,7 +34,7 @@ use Wild\Identify\SecurityLib\Strength;
  * @author     Anthony Ferrara <ircmaxell@ircmaxell.com>
  * @codeCoverageIgnore
  */
-class Rand implements \Wild\Identify\RandomLib\Source {
+class Rand implements \RedCat\Identify\RandomLib\Source {
 
     /**
      * Return an instance of Strength indicating the strength of the source

@@ -12,9 +12,9 @@
  * @license    http://www.opensource.org/licenses/mit-license.html  MIT License
  * @version    Build @@version@@
  */
-namespace Wild\Identify\SecurityLib\BigMath;
+namespace RedCat\Identify\SecurityLib\BigMath;
 
-use Wild\Identify\SecurityLib\BaseConverter;
+use RedCat\Identify\SecurityLib\BaseConverter;
 
 /**
  * A class for arbitrary precision math functions implemented in PHP
@@ -23,7 +23,7 @@ use Wild\Identify\SecurityLib\BaseConverter;
  * @package    Core
  * @subpackage BigMath
  */
-class PHPMath extends \Wild\Identify\SecurityLib\BigMath {
+class PHPMath extends \RedCat\Identify\SecurityLib\BigMath {
 
     /**
      * Add two numbers together

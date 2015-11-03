@@ -15,9 +15,9 @@
  * @version    Build @@version@@
  */
 
-namespace Wild\Identify\RandomLib;
+namespace RedCat\Identify\RandomLib;
 
-use Wild\Identify\SecurityLib\BaseConverter;
+use RedCat\Identify\SecurityLib\BaseConverter;
 
 /**
  * The Random Number Generator Class
@@ -195,7 +195,7 @@ class Generator {
         if ($bits == 63) {
             /**
              * Fixes issue #22
-             * @see https://github.com/ircmaxell/Wild\Identify\RandomLib/issues/22
+             * @see https://github.com/ircmaxell/RedCat\Identify\RandomLib/issues/22
              */
             $mask = 0x7fffffffffffffff;
         } else {

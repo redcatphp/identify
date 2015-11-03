@@ -14,9 +14,9 @@
  * @version    Build @@version@@
  */
 
-namespace Wild\Identify\RandomLib;
+namespace RedCat\Identify\RandomLib;
 
-use Wild\Identify\SecurityLib\Strength;
+use RedCat\Identify\SecurityLib\Strength;
 
 /**
  * The Random Factory
@@ -27,7 +27,7 @@ use Wild\Identify\SecurityLib\Strength;
  * @package    Random
  * @author     Anthony Ferrara <ircmaxell@ircmaxell.com>
  */
-class Factory extends \Wild\Identify\SecurityLib\AbstractFactory {
+class Factory extends \RedCat\Identify\SecurityLib\AbstractFactory {
 
     /**
      * @var array A list of available random number mixing strategies
@@ -57,7 +57,7 @@ class Factory extends \Wild\Identify\SecurityLib\AbstractFactory {
      * @return Generator The instantiated generator
      * @throws RuntimeException If an appropriate mixing strategy isn't found
      */
-    public function getGenerator(\Wild\Identify\SecurityLib\Strength $strength) {
+    public function getGenerator(\RedCat\Identify\SecurityLib\Strength $strength) {
         $sources    = $this->getSources();
         $newSources = array();
         foreach ($sources as $source) {
@@ -172,7 +172,7 @@ class Factory extends \Wild\Identify\SecurityLib\AbstractFactory {
      * @return Mixer The found mixer
      * @throws RuntimeException if a valid mixer cannot be found
      */
-    protected function findMixer(\Wild\Identify\SecurityLib\Strength $strength) {
+    protected function findMixer(\RedCat\Identify\SecurityLib\Strength $strength) {
         $newMixer = null;
         $fallback = null;
         foreach ($this->getMixers() as $mixer) {
