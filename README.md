@@ -8,10 +8,10 @@ Session
 
  The surikat session handler is independent from native php session and use a strong random id cookie which is regenerated when *$cookieLifetime* expire. Unlike native php session it allow you to use a session over any length you want, like one year for example, and it integrate an anti-bruteforce system with attempts records based on hashed ip. 
 ```php
-$name = 'surikat';  
+$name = 'redcat';  
 $cookieLifetime = 3600; // 1 hour  
 $sessionLifetime = 43200;  // 1 year  
-$session = new \\Wild\\Identify\\Session($name,$cookieLifetime,$sessionLifetime);  
+$session = new \\RedCat\\Identify\\Session($name,$cookieLifetime,$sessionLifetime);  
 if(isset($session['var']))  
     var\_dump( $session['var'] );  
 $session['var'] = 'value';  
@@ -252,10 +252,10 @@ $auth->lock($r,$redirect=true);
 AuthServer
 ----------
 
- First parameter correspond to *Wild\\Identify\\Auth* rights constants. You can use them directly, or if you use string (like in example) it will be automaticaly converted to corresponding constant. The rights constants are Auth::RIGHT\_MANAGE, Auth::RIGHT\_EDIT, Auth::RIGHT\_MODERATE, Auth::RIGHT\_POST.  
+ First parameter correspond to *RedCat\\Identify\\Auth* rights constants. You can use them directly, or if you use string (like in example) it will be automaticaly converted to corresponding constant. The rights constants are Auth::RIGHT\_MANAGE, Auth::RIGHT\_EDIT, Auth::RIGHT\_MODERATE, Auth::RIGHT\_POST.  
  The second parameter (true by default) is for enable GET redirection to avoid re-POST on refresh. 
 ```php
-$authServer = new \\Wild\\Identify\\AuthServer;  
+$authServer = new \\RedCat\\Identify\\AuthServer;  
 $authServer->htmlLock('RIGHT\_MANAGE',true);  
             
 ```
@@ -301,10 +301,10 @@ PHPMailer
 ---------
 
  PHPMailer - A full-featured email creation and transfer class for PHP.  
- PHPMailer is a third party toolbox. See the official [PHPMailer](https://github.com/PHPMailer/PHPMailer) and [examples](https://github.com/PHPMailer/PHPMailer/tree/master/examples). There is simple facade class in *Wild\\Identify* namespace for use PHPMailer in simplicity:  
+ PHPMailer is a third party toolbox. See the official [PHPMailer](https://github.com/PHPMailer/PHPMailer) and [examples](https://github.com/PHPMailer/PHPMailer/tree/master/examples). There is simple facade class in *RedCat\\Identify* namespace for use PHPMailer in simplicity:  
  
 ```php
-$mailer = new Wild\\Identify\\PHPMailer(  
+$mailer = new RedCat\\Identify\\PHPMailer(  
     $fromEmail,$fromName,  
     $replyEmail,$replyName,  
     $host,$port,$username,$passowrd,$secure,  
