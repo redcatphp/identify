@@ -245,7 +245,7 @@ class Auth{
 			'active'=>1,
 		];
 		if($this->db){
-			$user = $this->db->findOne($this->tableUsers,' WHERE email = ? AND type = ?',[$email,'persona']);
+			$user = $this->db->findOne($this->tableUsers,' email = ? AND type = ?',[$email,'persona']);
 			if(!$user){
 				try{
 					$user = $this->db->create($this->tableUsers,$userDefault);
@@ -467,7 +467,7 @@ class Auth{
 		if($type != "activation" && $type != "reset"){
 			return self::ERROR_SYSTEM_ERROR;
 		}
-		$row = $this->db->findOne($this->tableRequests,' WHERE '.$this->db->esc($this->tableUsers.'_id').' = ? AND type = ?',[$uid, $type]);
+		$row = $this->db->findOne($this->tableRequests,$this->db->esc($this->tableUsers.'_id').' = ? AND type = ?',[$uid, $type]);
 		if($row){
 			$this->deleteRequest($row->id);
 		}
@@ -495,7 +495,7 @@ class Auth{
 		}
 	}
 	private function getRequest($key, $type){
-		$row = $this->db->findOne($this->tableRequests,' WHERE rkey = ? AND type = ?',[$key, $type]);
+		$row = $this->db->findOne($this->tableRequests,' rkey = ? AND type = ?',[$key, $type]);
 		if(!$row){
 			$this->Session->addAttempt();
 			if($type=='activation')
@@ -587,7 +587,7 @@ class Auth{
 		}
 		if($e=$this->validateEmail($email))
 			return $r;
-		$row = $this->db->findOne($this->tableUsers,' WHERE email = ?',[$email]);
+		$row = $this->db->findOne($this->tableUsers,' email = ?',[$email]);
 		if(!$row){
 			$this->Session->addAttempt();
 			return self::ERROR_EMAIL_INCORRECT;
