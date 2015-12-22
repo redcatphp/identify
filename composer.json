@@ -14,7 +14,10 @@
 		}
 	],
 	"require": {
-		"php": ">=5.4.0"
+		"php": ">=5.4.0",
+		"phpseclib/phpseclib": "^2.0",
+		"ircmaxell/random-lib": "^1.1",
+		"phpmailer/phpmailer": "^5.2"
 	},
 	"autoload": {
 		"psr-4":{

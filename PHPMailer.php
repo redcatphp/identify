@@ -1,4 +1,5 @@
-<?php namespace RedCat\Identify;
+<?php
+namespace RedCat\Identify;
 use RedCat\Identify\PHPMailer\PHPMailer as OPHPMailer;
 class PHPMailer extends OPHPMailer{
 	function mail($email, $subject, $message, $html=true){
