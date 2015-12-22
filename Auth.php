@@ -9,6 +9,7 @@
  * @website http://redcatphp.com
  */
 namespace RedCat\Identify;
+use RedCat\Wire\Di;
 use RedCat\DataMap\B;
 use RedCat\DataMap\DataSource;
 if (version_compare(phpversion(), '5.5.0', '<')){
@@ -64,16 +65,18 @@ class Auth{
 	const ERROR_RESET_EXISTS = 33;
 	const ERROR_ALREADY_ACTIVATED = 34;
 	const ERROR_ACTIVATION_EXISTS = 35;
-	const OK_PASSWORD_CHANGED = 36;
-	const OK_EMAIL_CHANGED = 37;
-	const OK_ACCOUNT_ACTIVATED = 38;
-	const OK_ACCOUNT_DELETED = 39;
-	const OK_LOGGED_IN = 40;
-	const OK_LOGGED_OUT = 41;
-	const OK_REGISTER_SUCCESS = 42;
-	const OK_PASSWORD_RESET = 43;
-	const OK_RESET_REQUESTED = 44;
-	const OK_ACTIVATION_SENT = 45;
+	const ERROR_UNABLE_SEND_ACTIVATION = 36;
+	const OK = 100;
+	const OK_PASSWORD_CHANGED = 101;
+	const OK_EMAIL_CHANGED = 102;
+	const OK_ACCOUNT_ACTIVATED = 103;
+	const OK_ACCOUNT_DELETED = 104;
+	const OK_LOGGED_IN = 105;
+	const OK_LOGGED_OUT = 106;
+	const OK_REGISTER_SUCCESS = 107;
+	const OK_PASSWORD_RESET = 108;
+	const OK_RESET_REQUESTED = 109;
+	const OK_ACTIVATION_SENT = 110;
 
 	public $siteUrl;
 	private $db;
@@ -99,6 +102,7 @@ class Auth{
 	protected $mailSecure;
 	
 	protected $rootPasswordNeedRehash;
+	protected $di;
 	
 	function __construct(Session $Session=null,
 		$rootLogin = 'root',
@@ -116,7 +120,8 @@ class Auth{
 		$mailPassword= null,
 		$mailPort=25,
 		$mailSecure='tls',
-		DataSource $db = null
+		DataSource $db = null,
+		Di $di =null
 	){
 		$this->rootLogin = $rootLogin;
 		$this->rootPassword = $rootPassword;
@@ -142,6 +147,7 @@ class Auth{
 		}
 		$this->siteUrl = $this->getBaseHref();
 		$this->siteUrl = rtrim($this->siteUrl,'/').'/';
+		$this->di = $di;
 	}
 	function getSession(){
 		return $this->Session;
@@ -166,7 +172,8 @@ class Auth{
 			$subject = "{$fromName} - Password reset request";
 			$message = "Password reset request : <strong><a href=\"{$this->siteUrl}{$siteResetUri}?action=resetpass&key={$key}\">Reset my password</a></strong>";
 		}
-		return PHPMailer::mail([$email=>$login],$subject,$message);
+		$mailer = $this->di?$this->di->create(PHPMailer::class):new PHPMailer();
+		return $mailer->mail([$email=>$login],$subject,$message);
 	}
 	public function loginRoot($password,$lifetime=0){
 		$pass = $this->rootPassword;
@@ -282,7 +289,7 @@ class Auth{
 			return self::ERROR_LOGIN_PASSWORD_INCORRECT;
 		}
 		else{
-			$options = ['salt' => $user->salt, 'cost' => $this->cost];
+			$options = ['cost' => $this->cost];
 			if(password_needs_rehash($user->password, $this->algo, $options)){
 				$password = password_hash($password, $this->algo, $options);
 				$row = $this->db->read($this->tableUsers,(int)$user->id);
@@ -330,7 +337,8 @@ class Auth{
 			$this->Session->addAttempt();
 			return self::ERROR_LOGIN_TAKEN;
 		}
-		$this->addUser($email, $password, $login, $name);
+		if(self::ERROR_SYSTEM_ERROR===$this->addUser($email, $password, $login, $name))
+			return self::ERROR_UNABLE_SEND_ACTIVATION;
 		return self::OK_REGISTER_SUCCESS;
 	}
 	public function activate($key){
@@ -380,8 +388,8 @@ class Auth{
 		}
 		return $this->Session->destroy();
 	}
-	public function getHash($string, $salt){
-		return password_hash($string, $this->algo, ['salt' => $salt, 'cost' => $this->cost]);
+	public function getHash($string){
+		return password_hash($string, $this->algo, ['cost' => $this->cost]);
 	}
 	public function getUID($login){
 		if($this->db[$this->tableUsers]->exists())
@@ -401,36 +409,28 @@ class Auth{
 		return !!$this->getUID($login);
 	}
 	private function addUser($email, $password, $login=null, $name=null){
+		$password = $this->getHash($password);
+		if(!$login)
+			$login = $email;
+		if(!$name)
+			$name = $login;
 		try{
-			$row = $this->db->create($this->tableUsers,[]);
+			$row = $this->db->create($this->tableUsers,[				
+				'login' => $login,
+				'name' => $name,
+				'email' => $email,
+				'password' => $password,
+				'right' => self::ROLE_MEMBER,
+				'type' => 'local',
+			]);
 		}
 		catch(\Exception $e){
 			return self::ERROR_SYSTEM_ERROR;
 		}
 		$uid = $row->id;
-		if($e=$this->addRequest($uid, $email, "activation")){
-			$row->trash();
-			return $e;
-		}
-		$salt = substr(strtr(base64_encode(\mcrypt_create_iv(22, MCRYPT_DEV_URANDOM)), '+', '.'), 0, 22);
-		$password = $this->getHash($password, $salt);
-		if(!$login)
-			$login = $email;
-		if(!$name)
-			$name = $login;
-		$row->login = $login;
-		$row->name = $name;
-		$row->email = $email;
-		$row->password = $password;
-		$row->salt = $salt;
-		$row->right = self::ROLE_MEMBER;
-		$row->type = 'local';
-		try{
-			$this->db->create($row);
-		}
-		catch(\Exception $e){
+		if(self::ERROR_SYSTEM_ERROR===$e=$this->addRequest($uid, $email, 'activation')){
 			$this->db->delete($row);
-			return self::ERROR_SYSTEM_ERROR;
+			return $e;
 		}
 	}
 
@@ -452,12 +452,12 @@ class Auth{
 			return self::ERROR_PASSWORD_INCORRECT;
 		}
 		$row = $this->db->read($this->tableUsers,(int)$uid);
-		if(!$row->trash()){
+		if(!$this->db->delete($row)){
 			return self::ERROR_SYSTEM_ERROR;
 		}
 		$this->Session->destroyKey($uid);
-		foreach($row->own($this->tableRequests) as $request){
-			if(!$request->trash()){
+		foreach($this->db->one2many($row,$this->tableRequests) as $request){
+			if(!$this->db->delete($request)){
 				return self::ERROR_SYSTEM_ERROR;
 			}
 		}		
@@ -467,12 +467,12 @@ class Auth{
 		if($type != "activation" && $type != "reset"){
 			return self::ERROR_SYSTEM_ERROR;
 		}
-		$row = $this->db->findOne($this->tableRequests,' WHERE '.$this->db->safeColumn($this->tableUsers.'_id').' = ? AND type = ?',[$uid, $type]);
+		$row = $this->db->findOne($this->tableRequests,' WHERE '.$this->db->esc($this->tableUsers.'_id').' = ? AND type = ?',[$uid, $type]);
 		if($row){
 			$this->deleteRequest($row->id);
 		}
 		$user = $this->getUser($uid);
-		if($type == "activation" && isset($user->active) && $user->active == 1){
+		if($type == 'activation' && isset($user->active) && $user->active == 1){
 			return self::ERROR_ALREADY_ACTIVATED;
 		}
 		$key = (new RandomLib\Factory())->getMediumStrengthGenerator()->generate(40);
@@ -490,7 +490,7 @@ class Auth{
 		catch(\Exception $e){
 			return self::ERROR_SYSTEM_ERROR;
 		}
-		if(!$this->sendMail($email, $type, $key, $user->name)){
+		if(!$this->sendMail($email, $type, $key, isset($user->name)?$user->name:null)){
 			return self::ERROR_SYSTEM_ERROR;
 		}
 	}
@@ -568,7 +568,7 @@ class Auth{
 			return self::ERROR_SYSTEM_ERROR;
 		}
 		if(!($password&&password_verify($password, $user->password))){
-			$password = $this->getHash($password, $user->salt);
+			$password = $this->getHash($password);
 			$row = $this->db->read($this->tableUsers,$data[$this->tableUsers.'_id']);
 			$row->password = $password;
 			try{
@@ -620,7 +620,7 @@ class Auth{
 			$this->Session->addAttempt();
 			return self::ERROR_SYSTEM_ERROR;
 		}
-		$newpass = $this->getHash($newpass, $user->salt);
+		$newpass = $this->getHash($newpass);
 		if(!($password&&password_verify($currpass, $user->password))){
 			$this->Session->addAttempt();
 			return self::ERROR_PASSWORD_INCORRECT;
