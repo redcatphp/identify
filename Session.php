@@ -1,5 +1,6 @@
 <?php
 namespace RedCat\Identify;
+use RandomLib\Factory as RandomLibFactory;
 class Session{
 	private $id;
 	private $key;
@@ -260,8 +261,8 @@ class Session{
 		$this->SessionHandler->close();
 	}
 	function generateId(){
-		//return bin2hex((new RandomLib\Factory())->getMediumStrengthGenerator()->generate(round($this->idLength/2)));
-		return self::hex2setstring(bin2hex((new RandomLib\Factory())->getMediumStrengthGenerator()->generate(round($this->idLength))));
+		//return bin2hex((new RandomLibFactory())->getMediumStrengthGenerator()->generate(round($this->idLength/2)));
+		return self::hex2setstring(bin2hex((new RandomLibFactory())->getMediumStrengthGenerator()->generate(round($this->idLength))));
 	}
 	function getIp(){
 		return $this->server['REMOTE_ADDR'];

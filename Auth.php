@@ -12,6 +12,7 @@ namespace RedCat\Identify;
 use RedCat\Wire\Di;
 use RedCat\DataMap\B;
 use RedCat\DataMap\DataSource;
+use RandomLib\Factory as RandomLibFactory;
 if (version_compare(phpversion(), '5.5.0', '<')){
 	require_once __DIR__.'/password-compat.inc.php';
 }
@@ -475,7 +476,7 @@ class Auth{
 		if($type == 'activation' && isset($user->active) && $user->active == 1){
 			return self::ERROR_ALREADY_ACTIVATED;
 		}
-		$key = (new RandomLib\Factory())->getMediumStrengthGenerator()->generate(40);
+		$key = (new RandomLibFactory())->getMediumStrengthGenerator()->generate(40);
 		$expire = date("Y-m-d H:i:s", strtotime("+1 day"));
 		$request = [
 			'_type'=>$this->tableRequests,
