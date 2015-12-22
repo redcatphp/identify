@@ -33,9 +33,10 @@ class PHPMailer extends \PHPMailer\PHPMailer\PHPMailer{
 		$replyEmail=null,$replyName=null,
 		$host=null,$port=25,$username=null,$password=null,$secure=null,
 		$sendmail=null,
-		$debug=false,$exceptions=false
+		$debug=false,$exceptions=false,$SMTPOptions=[]
 	){
         parent::__construct($exceptions);
+        $this->SMTPOptions = $SMTPOptions;
 		if($host){
 			$this->isSMTP();
 			if(isset($debug)){
