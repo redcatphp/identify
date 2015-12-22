@@ -1,7 +1,6 @@
 <?php
 namespace RedCat\Identify;
-use PHPMailer\PHPMailer\PHPMailer as OPHPMailer;
-class PHPMailer extends OPHPMailer{
+class PHPMailer extends \PHPMailer\PHPMailer\PHPMailer{
 	function mail($email, $subject, $message, $html=true){
 		if(is_array($email)){
 			foreach($email as $k=>$v){
@@ -32,7 +31,7 @@ class PHPMailer extends OPHPMailer{
 	function __construct(
 		$fromEmail=null,$fromName=null,
 		$replyEmail=null,$replyName=null,
-		$host=null,$port=25,$username=null,$passowrd=null,$secure=null,
+		$host=null,$port=25,$username=null,$password=null,$secure=null,
 		$sendmail=null,
 		$debug=false,$exceptions=false
 	){
