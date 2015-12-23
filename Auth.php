@@ -9,6 +9,7 @@
  * @website http://redcatphp.com
  */
 namespace RedCat\Identify;
+
 use RedCat\Wire\Di;
 use RedCat\DataMap\B;
 use RedCat\DataMap\DataSource;
@@ -94,34 +95,30 @@ class Auth{
 	protected $tableUsers;
 	protected $tableRequests;
 	protected $algo;
-	protected $mailSendmail;
-	protected $mailHost;
-	protected $mailUsername;
-	protected $mailPassword;
-	protected $mailPort;
-	protected $mailSecure;
+	protected $mailActivationSubject;
+	protected $mailActivationTemplate;
+	protected $mailResetSubject;
+	protected $mailResetTemplate;
 	
 	protected $rootPasswordNeedRehash;
 	protected $di;
 	
 	function __construct(Session $Session=null,
 		$rootLogin = 'root',
-		$rootPassword = 'root',
+		$rootPassword = null,
 		$rootName	= 'Developer',
-		$siteLoginUri = 'Login',
-		$siteActivateUri = 'Signin',
-		$siteResetUri ='Signin',
+		$siteLoginUri = 'auth/login',
+		$siteActivateUri = 'auth/signin',
+		$siteResetUri ='auth/reset',
 		$tableUsers = 'user',
 		$tableRequests = 'request',
 		$algo = PASSWORD_DEFAULT,
-		$mailSendmail = true,
-		$mailHost=null,
-		$mailUsername=null,
-		$mailPassword= null,
-		$mailPort=25,
-		$mailSecure='tls',
 		DataSource $db = null,
-		Di $di =null
+		Di $di = null,
+		$mailActivationSubject='Account Activation',
+		$mailActivationTemplate=null,
+		$mailResetSubject='Password reset request',
+		$mailResetTemplate=null
 	){
 		$this->rootLogin = $rootLogin;
 		$this->rootPassword = $rootPassword;
@@ -132,17 +129,15 @@ class Auth{
 		$this->tableUsers = $tableUsers;
 		$this->tableRequests = $tableRequests;
 		$this->algo = $algo;
-		$this->mailSendmail = $mailSendmail;
-		$this->mailHost = $mailHost;
-		$this->mailUsername = $mailUsername;
-		$this->mailPassword = $mailPassword;
-		$this->mailPort = $mailPort;
-		$this->mailSecure = $mailSecure;
+		$this->mailActivationSubject = $mailActivationSubject;
+		$this->mailActivationTemplate = $mailActivationTemplate;
+		$this->mailResetSubject = $mailResetSubject;
+		$this->mailResetTemplate = $mailResetTemplate;
 		
 		if(!$Session)
 			$Session = new Session();
 		$this->Session = $Session;
-		if(!isset($db)&&class_exists('RedCat\DataMap\B')){
+		if(!isset($db)&&class_exists(B::class)){
 			$this->db = B::getDatabase();
 		}
 		$this->siteUrl = $this->getBaseHref();
@@ -156,26 +151,24 @@ class Auth{
 		return $this->rootPasswordNeedRehash;
 	}
 	function sendMail($email, $type, $key, $login){
-		$fromName = isset($this->mailFromName)?$this->mailFromName:null;
-		$fromEmail = isset($this->mailFromEmail)?$this->mailFromEmail:null;
-		$replyName = isset($this->mailReplyName)?$this->mailReplyName:null;
-		$replyEmail = isset($this->mailReplyEmail)?$this->mailReplyEmail:null;
-		$siteLoginUri = isset($this->siteLoginUri)?$this->siteLoginUri:null;
-		$siteActivateUri = isset($this->siteActivateUri)?$this->siteActivateUri:null;
-		$siteResetUri = isset($this->siteResetUri)?$this->siteResetUri:null;
-		
-		if($type=="activation"){
-			$subject = "{$fromName} - Account Activation";
-			$message = "Account activation required : <strong><a href=\"{$this->siteUrl}{$siteActivateUri}?action=activate&key={$key}\">Activate my account</a></strong>";
+		if($type=='activation'){
+			$subject = $this->mailActivationSubject;
+			if($this->mailActivationTemplate)
+				$message = includeOutput($this->mailActivationTemplate,['site'=>$this->siteUrl,'uri'=>$this->siteActivateUri,'key'=>$key]);
+			else
+				$message = "Account activation required : <strong><a href=\"{$this->siteUrl}{$this->siteActivateUri}?key={$key}\">Activate my account</a></strong>";
 		}
 		else{
-			$subject = "{$fromName} - Password reset request";
-			$message = "Password reset request : <strong><a href=\"{$this->siteUrl}{$siteResetUri}?action=resetpass&key={$key}\">Reset my password</a></strong>";
+			$subject = $this->mailResetSubject;
+			if($this->mailResetTemplate)
+				$message = includeOutput($this->mailResetTemplate,['site'=>$this->siteUrl,'uri'=>$this->siteResetUri,'key'=>$key]);
+			else
+				$message = "Password reset request : <strong><a href=\"{$this->siteUrl}{$this->siteResetUri}?key={$key}\">Reset my password</a></strong>";
 		}
 		$mailer = $this->di?$this->di->create(PHPMailer::class):new PHPMailer();
 		return $mailer->mail([$email=>$login],$subject,$message);
 	}
-	public function loginRoot($password,$lifetime=0){
+	function loginRoot($password,$lifetime=0){
 		$pass = $this->rootPassword;
 		if(!$pass)
 			return self::ERROR_SYSTEM_ERROR;
@@ -233,7 +226,7 @@ class Auth{
 		],$lifetime);
 		return self::OK_LOGGED_IN;
 	}
-	public function loginPersona($email,$lifetime=0){
+	function loginPersona($email,$lifetime=0){
 		if($e=$this->validateEmail($email))
 			return $e;
 		$userDefault = [
@@ -262,11 +255,11 @@ class Auth{
 		$this->addSession($user,$lifetime);
 		return self::OK_LOGGED_IN;
 	}
-	public function login($login, $password, $lifetime=0){
+	function login($login, $password, $lifetime=0){
 		if($s=$this->Session->isBlocked()){
 			return [self::ERROR_USER_BLOCKED,$s];
 		}
-		if($login==$this->rootLogin)
+		if($login==$this->rootLogin&&$this->rootPassword)
 			return $this->loginRoot($password,$lifetime);
 		if(!ctype_alnum($login)&&filter_var($login,FILTER_VALIDATE_EMAIL)){
 			if($this->db[$this->tableUsers]->exists())
@@ -312,7 +305,7 @@ class Auth{
 		return self::OK_LOGGED_IN;
 	}
 
-	public function register($email, $login, $password, $repeatpassword, $name=null){
+	function register($email, $login, $password, $repeatpassword, $name=null){
 		if ($s=$this->Session->isBlocked()){
 			return [self::ERROR_USER_BLOCKED,$s];
 		}
@@ -341,7 +334,7 @@ class Auth{
 			return self::ERROR_UNABLE_SEND_ACTIVATION;
 		return self::OK_REGISTER_SUCCESS;
 	}
-	public function activate($key){
+	function activate($key){
 		if($s=$this->Session->isBlocked()){
 			return [self::ERROR_USER_BLOCKED,$s];
 		}
@@ -362,7 +355,7 @@ class Auth{
 		$this->deleteRequest($getRequest['id']);
 		return self::OK_ACCOUNT_ACTIVATED;
 	}
-	public function requestReset($email){
+	function requestReset($email){
 		if ($s=$this->Session->isBlocked()){
 			return [self::ERROR_USER_BLOCKED,$s];
 		}
@@ -382,16 +375,16 @@ class Auth{
 		}
 		return self::OK_RESET_REQUESTED;
 	}
-	public function logout(){
+	function logout(){
 		if($this->connected()&&$this->Session->destroy()){
 			return self::OK_LOGGED_OUT;
 		}
 		return $this->Session->destroy();
 	}
-	public function getHash($string){
+	function getHash($string){
 		return password_hash($string, $this->algo, ['cost' => $this->cost]);
 	}
-	public function getUID($login){
+	function getUID($login){
 		if($this->db[$this->tableUsers]->exists())
 			return $this->db->getCell('SELECT id FROM '.$this->db->escTable($this->tableUsers).' WHERE login = ?',[$login]);
 	}
@@ -434,11 +427,11 @@ class Auth{
 		}
 	}
 
-	public function getUser($uid){
+	function getUser($uid){
 		return $this->db->read($this->tableUsers,(int)$uid);
 	}
 
-	public function deleteUser($uid, $password){
+	function deleteUser($uid, $password){
 		if ($s=$this->Session->isBlocked()){
 			return [self::ERROR_USER_BLOCKED,$s];
 		}
@@ -522,7 +515,7 @@ class Auth{
 	private function deleteRequest($id){
 		return $this->db->exec('DELETE FROM '.$this->db->escTable($this->tableRequests).' WHERE id = ?',[$id]);
 	}
-	public function validateLogin($login){
+	function validateLogin($login){
 		if (strlen($login) < 1)
 			return self::ERROR_LOGIN_SHORT;
 		elseif (strlen($login) > 30)
@@ -530,7 +523,7 @@ class Auth{
 		elseif(!ctype_alnum($login)&&!filter_var($login, FILTER_VALIDATE_EMAIL))
 			return self::ERROR_LOGIN_INVALID;
 	}
-	public function validateDisplayname($login){
+	function validateDisplayname($login){
 		if (strlen($login) < 1)
 			return self::ERROR_NAME_INVALID;
 		elseif (strlen($login) > 50)
@@ -548,7 +541,7 @@ class Auth{
 		if (!filter_var($email, FILTER_VALIDATE_EMAIL))
 			return self::ERROR_EMAIL_INVALID;
 	}
-	public function resetPass($key, $password, $repeatpassword){
+	function resetPass($key, $password, $repeatpassword){
 		if ($s=$this->Session->isBlocked()){
 			return [self::ERROR_USER_BLOCKED,$s];
 		}
@@ -581,7 +574,7 @@ class Auth{
 		$this->deleteRequest($data['id']);
 		return self::OK_PASSWORD_RESET;
 	}
-	public function resendActivation($email){
+	function resendActivation($email){
 		if ($s=$this->Session->isBlocked()){
 			return [self::ERROR_USER_BLOCKED,$s];
 		}
@@ -602,7 +595,7 @@ class Auth{
 		}
 		return self::OK_ACTIVATION_SENT;
 	}
-	public function changePassword($uid, $currpass, $newpass, $repeatnewpass){
+	function changePassword($uid, $currpass, $newpass, $repeatnewpass){
 		if ($s=$this->Session->isBlocked()){
 			return [self::ERROR_USER_BLOCKED,$s];
 		}
@@ -632,14 +625,14 @@ class Auth{
 		}
 		return self::OK_PASSWORD_CHANGED;
 	}
-	public function getEmail($uid){
+	function getEmail($uid){
 		$row = $this->db->read($this->tableUsers,(int)$uid);
 		if (!$row->id){
 			return false;
 		}
 		return $row->email;
 	}
-	public function changeEmail($uid, $email, $password){
+	function changeEmail($uid, $email, $password){
 		if($s=$this->Session->isBlocked()){
 			return [self::ERROR_USER_BLOCKED,$s];
 		}
@@ -742,4 +735,12 @@ class Auth{
 		}
 		exit;
 	}
+}
+
+function includeOutput(){
+	if(func_num_args()>1)
+		extract(func_get_arg(1));
+	ob_start();
+	include func_get_arg(0);
+	return ob_get_clean();
 }
