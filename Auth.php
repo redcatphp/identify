@@ -78,6 +78,7 @@ class Auth{
 	const OK_PASSWORD_RESET = 108;
 	const OK_RESET_REQUESTED = 109;
 	const OK_ACTIVATION_SENT = 110;
+	const OK_ACCOUNT_ACTIVATED_AND_AUTOLOGGED = 111;
 
 	public $siteUrl;
 	private $db;
@@ -334,7 +335,7 @@ class Auth{
 			return self::ERROR_UNABLE_SEND_ACTIVATION;
 		return self::OK_REGISTER_SUCCESS;
 	}
-	function activate($key){
+	function activate($key,$autologin=false,$lifetime=0){
 		if($s=$this->Session->isBlocked()){
 			return [self::ERROR_USER_BLOCKED,$s];
 		}
@@ -351,6 +352,12 @@ class Auth{
 		$row->active = 1;
 		$this->db->put($row);
 		$this->deleteRequest($getRequest['id']);
+		if($autologin){
+			if(!$this->addSession($user,$lifetime)){
+				return self::ERROR_SYSTEM_ERROR;
+			}
+			return self::OK_ACCOUNT_ACTIVATED_AND_AUTOLOGGED;
+		}
 		return self::OK_ACCOUNT_ACTIVATED;
 	}
 	function requestReset($email){
@@ -387,9 +394,12 @@ class Auth{
 			return $this->db->getCell('SELECT id FROM '.$this->db->escTable($this->tableUsers).' WHERE login = ?',[$login]);
 	}
 	private function addSession($user,$lifetime=0){
+		$user = (array)$user;
+		if(isset($user['password']))
+			unset($user['password']);
 		$this->Session->setCookieLifetime($lifetime);
-		$this->Session->setKey($user->id);
-		$this->Session->set('_AUTH_',(array)$user);
+		$this->Session->setKey($user['id']);
+		$this->Session->set('_AUTH_',$user);
 		return true;
 	}
 	private function isEmailTaken($email){
