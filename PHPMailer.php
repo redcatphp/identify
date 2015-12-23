@@ -36,6 +36,7 @@ class PHPMailer extends \PHPMailer\PHPMailer\PHPMailer{
 		$debug=false,$exceptions=false,$SMTPOptions=[]
 	){
         parent::__construct($exceptions);
+		$this->CharSet = 'UTF-8';
         $this->SMTPOptions = $SMTPOptions;
 		if($host){
 			$this->isSMTP();
