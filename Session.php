@@ -242,7 +242,7 @@ class Session{
 	function isModified(){
 		return $this->origin!==$this->data;
 	}
-	function __destruct(){
+	function flush(){
 		if($this->lockFile)
 			unlink($this->lockFile);
 		if($this->isModified()){
