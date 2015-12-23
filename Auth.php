@@ -338,11 +338,9 @@ class Auth{
 		if($s=$this->Session->isBlocked()){
 			return [self::ERROR_USER_BLOCKED,$s];
 		}
-		if(strlen($key) !== 40){
-			$this->Session->addAttempt();
+		$getRequest = $this->getRequest($key, 'activation');
+		if(!is_array($getRequest))
 			return self::ERROR_ACTIVEKEY_INVALID;
-		}
-		$getRequest = $this->getRequest($key, "activation");
 		$user = $this->getUser($getRequest[$this->tableUsers.'_id']);
 		if(isset($user->active)&&$user->active==1){
 			$this->Session->addAttempt();
@@ -415,6 +413,7 @@ class Auth{
 				'password' => $password,
 				'right' => self::ROLE_MEMBER,
 				'type' => 'local',
+				'active' => 0,
 			]);
 		}
 		catch(\Exception $e){
@@ -507,13 +506,10 @@ class Auth{
 			elseif($type=='reset')
 				return self::ERROR_ACTIVEKEY_EXPIRED;
 		}
-		return [
-			'id' => $row->id,
-			$this->tableUsers.'_id' => $row->{'_one_'.$this->tableUsers}->id
-		];
+		return (array)$row;
 	}
 	private function deleteRequest($id){
-		return $this->db->exec('DELETE FROM '.$this->db->escTable($this->tableRequests).' WHERE id = ?',[$id]);
+		return $this->db->execute('DELETE FROM '.$this->db->escTable($this->tableRequests).' WHERE id = ?',[$id]);
 	}
 	function validateLogin($login){
 		if (strlen($login) < 1)
@@ -545,15 +541,15 @@ class Auth{
 		if ($s=$this->Session->isBlocked()){
 			return [self::ERROR_USER_BLOCKED,$s];
 		}
-		if(strlen($key) != 40){
-			return self::ERROR_RESETKEY_INVALID;
-		}
 		if($e=$this->validatePassword($password))
 			return $e;
 		if($password !== $repeatpassword){ // Passwords don't match
 			return self::ERROR_NEWPASSWORD_NOMATCH;
 		}
-		$data = $this->getRequest($key, "reset");
+		$data = $this->getRequest($key, 'reset');
+		if(!is_array($data))
+			return self::ERROR_RESETKEY_INVALID;
+			
 		$user = $this->getUser($data[$this->tableUsers.'_id']);
 		if(!$user){
 			$this->Session->addAttempt();
