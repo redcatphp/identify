@@ -357,7 +357,7 @@ class Session{
 		return 'http'.($this->getServerHttps()=="on"?'s':'').'://';
 	}
 	function getServerHref(){
-		return $this->server['SERVER_NAME'];
+		return isset($this->server['SERVER_NAME'])?$this->server['SERVER_NAME']:null;
 	}
 	function getPortHref(){
 		$ssl = $this->getServerHttps()=="on";

@@ -104,6 +104,10 @@ class Auth{
 	protected $rootPasswordNeedRehash;
 	protected $di;
 	
+	protected $baseHref;
+	protected $suffixHref;
+	protected $server;
+	
 	function __construct(Session $Session=null,
 		$rootLogin = 'root',
 		$rootPassword = null,
@@ -119,7 +123,8 @@ class Auth{
 		$mailActivationSubject='Account Activation',
 		$mailActivationTemplate=null,
 		$mailResetSubject='Password reset request',
-		$mailResetTemplate=null
+		$mailResetTemplate=null,
+		$server=null
 	){
 		$this->rootLogin = $rootLogin;
 		$this->rootPassword = $rootPassword;
@@ -144,6 +149,10 @@ class Auth{
 		$this->siteUrl = $this->getBaseHref();
 		$this->siteUrl = rtrim($this->siteUrl,'/').'/';
 		$this->di = $di;
+		
+		if(!$server)
+			$server = &$_SERVER;
+		$this->server = $server;
 	}
 	function getSession(){
 		return $this->Session;
@@ -669,26 +678,52 @@ class Auth{
 		}
 		return self::OK_EMAIL_CHANGED;
 	}
+	
+	function setBaseHref($href){
+		$this->baseHref = $href;
+	}
+	function getServerHttps(){
+		return isset($this->server['HTTPS'])?$this->server['HTTPS']:null;
+	}
+	function getServerPort(){
+		return isset($this->server['SERVER_PORT'])?$this->server['SERVER_PORT']:null;
+	}
+	function getProtocolHref(){
+		return 'http'.($this->getServerHttps()=="on"?'s':'').'://';
+	}
+	function getServerHref(){
+		return isset($this->server['SERVER_NAME'])?$this->server['SERVER_NAME']:null;
+	}
+	function getPortHref(){
+		$ssl = $this->getServerHttps()=="on";
+		return $this->getServerPort()&&((!$ssl&&(int)$this->getServerPort()!=80)||($ssl&&(int)$this->getServerPort()!=443))?':'.$this->getServerPort():'';
+	}
 	function getBaseHref(){
-		if(isset($this->siteUrl)&&$this->siteUrl)
-			return $this->siteUrl;
-		$protocol = 'http'.(isset($_SERVER["HTTPS"])&&$_SERVER["HTTPS"]=="on"?'s':'').'://';
-		$name = $_SERVER['SERVER_NAME'];
-		$ssl = isset($_SERVER["HTTPS"])&&$_SERVER["HTTPS"]==="on";
-		$port = isset($_SERVER['SERVER_PORT'])&&$_SERVER['SERVER_PORT']&&((!$ssl&&(int)$_SERVER['SERVER_PORT']!=80)||($ssl&&(int)$_SERVER['SERVER_PORT']!=443))?':'.$_SERVER['SERVER_PORT']:'';
-		if(isset($_SERVER['REDCAT_URI'])){
-			$suffixHref = ltrim($_SERVER['REDCAT_URI'],'/');
+		if(!isset($this->baseHref)){
+			$this->setBaseHref($this->getProtocolHref().$this->getServerHref().$this->getPortHref().'/');
 		}
-		else{
-			$docRoot = $_SERVER['DOCUMENT_ROOT'].'/';
-			if(defined('REDCAT_CWD'))
-				$cwd = REDCAT_CWD;
-			else
-				$cwd = getcwd();
-			if($docRoot!=$cwd&&strpos($cwd,$docRoot)===0)
-				$suffixHref = substr($cwd,strlen($docRoot));
+		return $this->baseHref.$this->getSuffixHref();
+	}
+	function setSuffixHref($href){
+		$this->suffixHref = $href;
+	}
+	function getSuffixHref(){
+		if(!isset($this->suffixHref)){
+			if(isset($this->server['REDCAT_URI'])){
+				$this->suffixHref = $this->server['REDCAT_URI'];
+			}
+			else{
+				$docRoot = $this->server['DOCUMENT_ROOT'].'/';
+				//$docRoot = dirname($this->server['SCRIPT_FILENAME']).'/';
+				if(defined('REDCAT_CWD'))
+					$cwd = REDCAT_CWD;
+				else
+					$cwd = getcwd();
+				if($docRoot!=$cwd&&strpos($cwd,$docRoot)===0)
+					$this->suffixHref = substr($cwd,strlen($docRoot));
+			}
 		}
-		return $protocol.$name.$port.'/'.$suffixHref;
+		return $this->suffixHref;
 	}
 
 	function getRight(){
