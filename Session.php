@@ -263,7 +263,7 @@ class Session{
 		return Random::getString(round($this->idLength));
 	}
 	function getIp(){
-		return $this->server['REMOTE_ADDR'];
+		return isset($this->server['REMOTE_ADDR'])?$this->server['REMOTE_ADDR']:null;
 	}
 	function getIpHash(){
 		return sha1($this->getIp());
