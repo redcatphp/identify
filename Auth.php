@@ -146,13 +146,15 @@ class Auth{
 		if(!isset($db)&&class_exists(B::class)){
 			$this->db = B::getDatabase();
 		}
-		$this->siteUrl = $this->getBaseHref();
-		$this->siteUrl = rtrim($this->siteUrl,'/').'/';
-		$this->di = $di;
 		
 		if(!$server)
 			$server = &$_SERVER;
 		$this->server = $server;
+
+		$this->siteUrl = $this->getBaseHref();
+		$this->siteUrl = rtrim($this->siteUrl,'/').'/';
+
+		$this->di = $di;
 	}
 	function getSession(){
 		return $this->Session;
