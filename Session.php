@@ -54,32 +54,11 @@ class Session{
 		$this->SessionHandler = $sessionHandler;
 		$this->Cookie = &$_COOKIE;
 		$this->garbageCollector();
-		
 	}
 	function setId($id){
 		$this->id = $id;
-		$this->localId = hash('sha512',$id);
+		$this->localId = $id?hash('sha512',$id):null;
 		$this->cookieId = urlencode($id);
-	}
-	function followRegeneration(){
-		$sf = func_num_args()?$this->serverFile(func_get_arg(0)):$this->serverFile();
-		$old = $sf.'.regenerated';
-		if(is_file($old)){
-			if(filemtime($old)+30>time()){
-				$fid = file_get_contents($old);
-				$this->setId($fid);
-				if($this->serverExist()){
-					$this->origin = $this->data = (array)unserialize($this->SessionHandler->read($this->getPrefix().$this->localId));
-					return true;
-				}
-				else{
-					return $this->followRegeneration($fid);
-				}
-			}
-			else{
-				unlink($old);
-			}
-		}
 	}
 	function handle($reload=false){
 		if($this->handled&&(!$reload||!$this->handled))
@@ -89,6 +68,15 @@ class Session{
 		if($this->clientExist()){
 			$this->setId($this->clientId());
 			$this->key = $this->clientKey();
+			
+			$lock = $this->savePath.$this->key.'.lock';
+			while(file_exists($lock)){
+				if(($mt=filemtime($lock))&&$mt+10<time())
+					unlink($lock);
+				else
+					sleep(.5);
+			}
+			touch($lock);
 			
 			if($this->serverExist()){
 				$this->origin = $this->data = (array)unserialize($this->SessionHandler->read($this->getPrefix().$this->localId));
@@ -103,6 +91,10 @@ class Session{
 					$this->checkBlocked();
 				}
 			}
+			
+			
+			unlink($lock);
+			
 		}
 		if(!isset($this->data['_FP_'])){
 			$this->data['_FP_'] = $this->getClientFP();
@@ -122,6 +114,27 @@ class Session{
 						unlink($file);
 					}
 				}
+			}
+		}
+	}
+	function followRegeneration(){
+		$sf = func_num_args()?$this->serverFile(func_get_arg(0)):$this->serverFile();
+		$old = $sf.'.regenerated';
+		if(is_file($old)){
+			if(filemtime($old)+30>time()){
+				$fid = file_get_contents($old);
+				$this->setId($fid);
+				if($this->serverExist()){
+					$this->writeCookie();
+					$this->origin = $this->data = (array)unserialize($this->SessionHandler->read($this->getPrefix().$this->localId));
+					return true;
+				}
+				else{
+					return $this->followRegeneration($fid);
+				}
+			}
+			else{
+				unlink($old);
 			}
 		}
 	}
@@ -162,12 +175,12 @@ class Session{
 			$new = $this->serverFile();
 		}
 		while(file_exists($new));
-		if($old&&@rename($old,$new))
-			file_put_contents($old.'.regenerated',$this->id);
+		file_put_contents($old.'.regenerated',$this->id);
+		rename($old,$new);
 		$this->writeCookie();
 	}
 	function getClientFP(){
-		return md5($_SERVER['REMOTE_ADDR'].' '.$_SERVER['HTTP_USER_AGENT']);
+		return md5($this->server['REMOTE_ADDR'].' '.$this->server['HTTP_USER_AGENT']);
 	}
 	function autoRegenerateId(){
 		$now = time();
@@ -243,8 +256,6 @@ class Session{
 		return $this->origin!==$this->data;
 	}
 	function flush(){
-		if($this->lockFile)
-			unlink($this->lockFile);
 		if($this->isModified()){
 			if(!$this->id)
 				$this->setId($this->generateId());
