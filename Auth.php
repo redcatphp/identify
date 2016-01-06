@@ -406,7 +406,7 @@ class Auth{
 		if(isset($user->password))
 			unset($user->password);
 		$this->Session->setCookieLifetime($lifetime);
-		$this->Session->setKey($user['id']);
+		$this->Session->setKey($user->id);
 		$this->Session->set('_AUTH_',$user);
 		return true;
 	}
