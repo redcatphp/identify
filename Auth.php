@@ -403,9 +403,8 @@ class Auth{
 			return $this->db->getCell('SELECT id FROM '.$this->db->escTable($this->tableUsers).' WHERE login = ?',[$login]);
 	}
 	private function addSession($user,$lifetime=0){
-		$user = (array)$user;
-		if(isset($user['password']))
-			unset($user['password']);
+		if(isset($user->password))
+			unset($user->password);
 		$this->Session->setCookieLifetime($lifetime);
 		$this->Session->setKey($user['id']);
 		$this->Session->set('_AUTH_',$user);
