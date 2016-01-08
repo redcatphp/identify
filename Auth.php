@@ -153,7 +153,6 @@ class Auth{
 
 		$this->siteUrl = $this->getBaseHref();
 		$this->siteUrl = rtrim($this->siteUrl,'/').'/';
-
 		$this->di = $di;
 	}
 	function getSession(){
@@ -351,18 +350,18 @@ class Auth{
 			return [self::ERROR_USER_BLOCKED,$s];
 		}
 		$getRequest = $this->getRequest($key, 'activation');
-		if(!is_array($getRequest))
+		if(!is_object($getRequest))
 			return self::ERROR_ACTIVEKEY_INVALID;
-		$user = $this->getUser($getRequest[$this->tableUsers.'_id']);
+		$user = $this->getUser($getRequest->{$this->tableUsers.'_id'});
 		if(isset($user->active)&&$user->active==1){
 			$this->Session->addAttempt();
-			$this->deleteRequest($getRequest['id']);
+			$this->deleteRequest($getRequest->id);
 			return self::ERROR_SYSTEM_ERROR;
 		}
-		$row = $this->db->read($this->tableUsers,(int)$getRequest[$this->tableUsers.'_id']);
+		$row = $this->db->read($this->tableUsers,(int)$getRequest->{$this->tableUsers.'_id'});
 		$row->active = 1;
 		$this->db->put($row);
-		$this->deleteRequest($getRequest['id']);
+		$this->deleteRequest($getRequest->id);
 		if($autologin){
 			if(!$this->addSession($user,$lifetime)){
 				return self::ERROR_SYSTEM_ERROR;
@@ -395,7 +394,6 @@ class Auth{
 		if($this->connected()&&$this->Session->destroy()){
 			return self::OK_LOGGED_OUT;
 		}
-		return $this->Session->destroy();
 	}
 	function getHash($string){
 		return password_hash($string, $this->algo, ['cost' => $this->cost]);
@@ -529,7 +527,7 @@ class Auth{
 			elseif($type=='reset')
 				return self::ERROR_ACTIVEKEY_EXPIRED;
 		}
-		return (array)$row;
+		return $row;
 	}
 	private function deleteRequest($id){
 		return $this->db->execute('DELETE FROM '.$this->db->escTable($this->tableRequests).' WHERE id = ?',[$id]);
@@ -714,7 +712,7 @@ class Auth{
 	function getSuffixHref(){
 		if(!isset($this->suffixHref)){
 			if(isset($this->server['REDCAT_URI'])){
-				$this->suffixHref = $this->server['REDCAT_URI'];
+				$this->suffixHref = ltrim($this->server['REDCAT_URI'],'/');				
 			}
 			else{
 				$docRoot = $this->server['DOCUMENT_ROOT'].'/';
