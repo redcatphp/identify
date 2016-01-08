@@ -89,6 +89,7 @@ class Auth{
 	
 	protected $rootLogin;
 	protected $rootPassword;
+	protected $rootEmail;
 	protected $rootName;
 	protected $siteLoginUri;
 	protected $siteActivateUri;
@@ -112,6 +113,7 @@ class Auth{
 		$rootLogin = 'root',
 		$rootPassword = null,
 		$rootName	= 'Developer',
+		$rootEmail	= null,
 		$siteLoginUri = 'auth/login',
 		$siteActivateUri = 'auth/signin',
 		$siteResetUri ='auth/reset',
@@ -128,6 +130,7 @@ class Auth{
 	){
 		$this->rootLogin = $rootLogin;
 		$this->rootPassword = $rootPassword;
+		$this->rootEmail = $rootEmail;
 		$this->rootName = $rootName;
 		$this->siteLoginUri = $siteLoginUri;
 		$this->siteActivateUri = $siteActivateUri;
@@ -204,8 +207,12 @@ class Auth{
 			}
 		}
 		if($this->db){
-			if($this->db[$this->tableUsers]->exists())
-				$id = $this->db->getCell('SELECT id FROM '.$this->db->escTable($this->tableUsers).' WHERE login = ?',[$this->rootLogin]);
+			if($this->db[$this->tableUsers]->exists()){
+				if($this->rootEmail)
+					$id = $this->db->getCell('SELECT id FROM '.$this->db->escTable($this->tableUsers).' WHERE login = ?',[$this->rootLogin]);
+				else
+					$id = $this->db->getCell('SELECT id FROM '.$this->db->escTable($this->tableUsers).' WHERE login = ? OR email = ?',[$this->rootLogin,$this->rootEmail]);
+			}
 			else
 				$id = null;
 			if(!$id){
@@ -214,7 +221,7 @@ class Auth{
 						->create($this->tableUsers,[
 							'login'=>$this->rootLogin,
 							'name'=>isset($this->rootName)?$this->rootName:$this->rootLogin,
-							'email'=>isset($this->rootPasswordEmail)?$this->rootPasswordEmail:null,
+							'email'=>isset($this->rootEmail)?$this->rootEmail:null,
 							'active'=>1,
 							'right'=>static::ROLE_ADMIN,
 							'type'=>'root'
@@ -231,7 +238,7 @@ class Auth{
 			'id'=>$id,
 			'login'=>$this->rootLogin,
 			'name'=>isset($this->rootName)?$this->rootName:$this->rootLogin,
-			'email'=>isset($this->email)?$this->email:null,
+			'email'=>isset($this->rootEmail)?$this->rootEmail:null,
 			'right'=>static::ROLE_ADMIN,
 			'type'=>'root'
 		],$lifetime);
@@ -270,24 +277,29 @@ class Auth{
 		if($s=$this->Session->isBlocked()){
 			return [self::ERROR_USER_BLOCKED,$s];
 		}
-		if($login==$this->rootLogin&&$this->rootPassword)
+		if($login==$this->rootLogin||($this->rootEmail&&$login==$this->rootEmail)&&$this->rootPassword)
 			return $this->loginRoot($password,$lifetime);
-		if(!ctype_alnum($login)&&filter_var($login,FILTER_VALIDATE_EMAIL)){
-			if($this->db[$this->tableUsers]->exists())
-				$login = $this->db->getCell('SELECT login FROM '.$this->db->escTable($this->tableUsers).' WHERE email = ?',[$login]);
-			else
-				$login = null;
-		}
-		if($e=($this->validateLogin($login)||$this->validatePassword($password))){
+		$loginIsEmail = !ctype_alnum($login)&&filter_var($login,FILTER_VALIDATE_EMAIL);
+		if(!$loginIsEmail&&$this->validateLogin($login)){
 			$this->Session->addAttempt();
 			return self::ERROR_LOGIN_PASSWORD_INVALID;
 		}
-		$uid = $this->getUID($login);
-		if(!$uid){
+		if($this->validatePassword($password)){
+			$this->Session->addAttempt();
+			return self::ERROR_LOGIN_PASSWORD_INVALID;
+		}
+		
+		$col = $loginIsEmail?'email':'login';
+		
+		$user = null;
+		if($this->db[$this->tableUsers]->exists()){
+			 $user = $this->db[$this->tableUsers]->getClone()->where($col.' = ?',[$login])->getRow();
+		}
+		if(!$user){
 			$this->Session->addAttempt();
 			return self::ERROR_LOGIN_PASSWORD_INCORRECT;
 		}
-		$user = $this->getUser($uid);
+		
 		if(!($password&&password_verify($password, $user->password))){
 			$this->Session->addAttempt();
 			return self::ERROR_LOGIN_PASSWORD_INCORRECT;
@@ -398,10 +410,6 @@ class Auth{
 	function getHash($string){
 		return password_hash($string, $this->algo, ['cost' => $this->cost]);
 	}
-	function getUID($login){
-		if($this->db[$this->tableUsers]->exists())
-			return $this->db->getCell('SELECT id FROM '.$this->db->escTable($this->tableUsers).' WHERE login = ?',[$login]);
-	}
 	private function addSession($user,$lifetime=0){
 		$this->Session->setCookieLifetime($lifetime);
 		$this->Session->setKey($user->id);
@@ -415,10 +423,11 @@ class Auth{
 	}
 	private function isEmailTaken($email){
 		if($this->db[$this->tableUsers]->exists())
-			return !!$this->db->getCell('SELECT id FROM '.$this->db->escTable($this->tableUsers).' WHERE email = ?',[$email]);
+			return (bool)$this->db->getCell('SELECT id FROM '.$this->db->escTable($this->tableUsers).' WHERE email = ?',[$email]);
 	}
 	private function isLoginTaken($login){
-		return !!$this->getUID($login);
+		if($this->db[$this->tableUsers]->exists())
+			 return (bool)$this->db->getCell('SELECT id FROM '.$this->db->escTable($this->tableUsers).' WHERE login = ?',[$login]);
 	}
 	private function addUser($email, $password, $login=null, $name=null){
 		$password = $this->getHash($password);
