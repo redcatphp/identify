@@ -332,13 +332,11 @@ class Auth{
 		if ($s=$this->Session->isBlocked()){
 			return [self::ERROR_USER_BLOCKED,$s];
 		}
-		if(!$name)
-			$name = $login;
 		if($e=$this->validateEmail($email))
 			return $e;
-		if($e=$this->validateLogin($login))
+		if($login&&($e=$this->validateLogin($login)))
 			return $e;
-		if($e=$this->validateDisplayname($name))
+		if($name&&($e=$this->validateDisplayname($name)))
 			return $e;
 		if($e=$this->validatePassword($password))
 			return $e;
@@ -349,7 +347,7 @@ class Auth{
 			$this->Session->addAttempt();
 			return self::ERROR_EMAIL_TAKEN;
 		}
-		if($this->isLoginTaken($login)){
+		if($login&&$this->isLoginTaken($login)){
 			$this->Session->addAttempt();
 			return self::ERROR_LOGIN_TAKEN;
 		}
@@ -431,10 +429,6 @@ class Auth{
 	}
 	private function addUser($email, $password, $login=null, $name=null){
 		$password = $this->getHash($password);
-		if(!$login)
-			$login = $email;
-		if(!$name)
-			$name = $login;
 		try{
 			$row = $this->db->create($this->tableUsers,[				
 				'login' => $login,
