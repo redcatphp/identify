@@ -45,7 +45,8 @@ class Session{
 			$server = &$_SERVER;
 		$this->server = $server;
 		$this->cookiePath = $this->getSuffixHref();
-		$this->cookieDomain = $this->getServerHref();
+		//$this->cookieDomain = $this->getServerHref();
+		$this->cookieDomain = null;
 		$this->cookieLifetime = $cookieLifetime;
 		$this->maxLifetime = $maxLifetime;
 		$this->checkBlocked();
@@ -342,14 +343,14 @@ class Session{
 			unset($this->data[$k]);
 		}
 	}
-	function setCookie($name, $value='', $expire = 0, $path = '', $domain='', $secure=false, $httponly=true, $global=true){
+	function setCookie($name, $value='', $expire = 0, $path = '', $domain=null, $secure=false, $httponly=true, $global=true){
 		if($expire&&isset($this->Cookie[$name]))
 			$this->removeCookie($name, $path, $domain, $secure, $httponly);
 		if($global)
 			$this->Cookie[$name] = $value;
         return setcookie($name, $value, $expire, $path, $domain, $secure, $httponly);
     }
-    function removeCookie($name, $path = '', $domain='', $secure=false, $httponly=true){
+    function removeCookie($name, $path = '', $domain=null, $secure=false, $httponly=true){
 		if(isset($this->Cookie[$name]))
 			unset($this->Cookie[$name]);
         return setcookie($name, null, -1, $path, $domain, $secure, $httponly);
