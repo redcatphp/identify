@@ -144,6 +144,7 @@ class Session{
 			$this->SessionHandler->destroy($this->getPrefix().$this->localId);
 		$this->SessionHandler->close();
 		$this->removeCookie($this->name,$this->cookiePath,$this->cookieDomain,false,true);
+		$this->data = [];
 		return true;
 	}
 	function destroyKey($key){
