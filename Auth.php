@@ -10,7 +10,7 @@
  */
 namespace RedCat\Identify;
 
-use RedCat\Wire\Di;
+use RedCat\Ding\Di;
 use RedCat\DataMap\B;
 use RedCat\DataMap\DataSource;
 if (version_compare(phpversion(), '5.5.0', '<')){
