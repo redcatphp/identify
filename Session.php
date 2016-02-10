@@ -93,8 +93,8 @@ class Session{
 				}
 			}
 			
-			
-			unlink($lock);
+			if(file_exists($lock))
+				@unlink($lock);
 			
 		}
 		if(!isset($this->data['_FP_'])){
