@@ -146,7 +146,7 @@ class Auth{
 		if(!$Session)
 			$Session = new Session();
 		$this->Session = $Session;
-		if(!isset($db)&&class_exists(B::class)){
+		if(!isset($db)){
 			$this->db = B::getDatabase();
 		}
 		
@@ -179,7 +179,7 @@ class Auth{
 			else
 				$message = "Password reset request : <strong><a href=\"{$this->siteUrl}{$this->siteResetUri}?key={$key}\">Reset my password</a></strong>";
 		}
-		$mailer = $this->di?$this->di->create(PHPMailer::class):new PHPMailer();
+		$mailer = $this->di->create(PHPMailer::class);
 		return $mailer->mail([$email=>$login],$subject,$message);
 	}
 	function loginRoot($password,$lifetime=0){

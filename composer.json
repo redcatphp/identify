@@ -17,7 +17,9 @@
 		"php": ">=5.4.0",
 		"phpseclib/phpseclib": "^2.0",
 		"ircmaxell/random-lib": "^1.1",
-		"phpmailer/phpmailer": "^5.2"
+		"phpmailer/phpmailer": "^5.2",
+		"redcatphp/ding": "@dev",
+		"redcatphp/datamap": "@dev"
 	},
 	"autoload": {
 		"psr-4":{
