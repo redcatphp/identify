@@ -73,7 +73,7 @@ class Session{
 			$lock = $this->savePath.$this->key.'.lock';
 			while(file_exists($lock)){
 				if(($mt=filemtime($lock))&&$mt+10<time())
-					unlink($lock);
+					@unlink($lock);
 				else
 					sleep(.5);
 			}
@@ -255,7 +255,7 @@ class Session{
 		$this->origin = $this->data = [];
 	}
 	function isModified(){
-		return $this->origin!==$this->data;
+		return !empty($this->data)&&$this->origin!==$this->data;
 	}
 	function flush(){
 		if($this->isModified()){
