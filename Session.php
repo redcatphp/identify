@@ -178,8 +178,9 @@ class Session{
 		}
 		while(file_exists($new));
 		file_put_contents($old.'.regenerated',$this->id);
-		rename($old,$new);
-		$this->writeCookie();
+		if(@rename($old,$new)){
+			$this->writeCookie();
+		}
 	}
 	function getClientFP(){
 		return md5($this->server['REMOTE_ADDR'].' '.$this->server['HTTP_USER_AGENT']);
