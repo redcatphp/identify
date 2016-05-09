@@ -158,6 +158,7 @@ class Session{
 			$this->key = $key;
 			$new = $this->serverFile();
 			rename($old,$new);
+			touch($new);
 		}
 		else{
 			$this->key = $key;
@@ -179,6 +180,7 @@ class Session{
 		while(file_exists($new));
 		file_put_contents($old.'.regenerated',$this->id);
 		if(@rename($old,$new)){
+			touch($new);
 			$this->writeCookie();
 		}
 	}
