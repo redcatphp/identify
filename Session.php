@@ -29,13 +29,15 @@ class Session{
     protected $baseHref;
 	protected $suffixHref;
 	protected $server;
+	protected $bruteforceProtection;
 	function __construct(
 		$name,
 		$cookieLifetime=0,
 		$maxLifetime=31536000,  //1 year
 		$saveRoot = null,
 		SessionHandlerInterface $sessionHandler = null,
-		$server=null
+		$server=null,
+		$bruteforceProtection=true
 	){
 		$this->name = $name;
 		$this->saveRoot = rtrim($saveRoot,'/').'/';
@@ -44,6 +46,7 @@ class Session{
 		if(!$server)
 			$server = &$_SERVER;
 		$this->server = $server;
+		$this->bruteforceProtection = $bruteforceProtection;
 		$this->cookiePath = $this->getSuffixHref();
 		//$this->cookieDomain = $this->getServerHref();
 		$this->cookieDomain = null;
@@ -248,7 +251,7 @@ class Session{
 		$this->cookieLifetime = $time;
 	}
 	function checkBlocked(){
-		if($s=$this->isBlocked()){
+		if($this->bruteforceProtection&&($s=$this->isBlocked())){
 			$this->removeCookie($this->name,$this->cookiePath,$this->cookieDomain,false,true);
 			$this->reset();
 			throw new SecurityException(sprintf('Too many failed session open or login submit. Are you trying to bruteforce me ? Wait for %d seconds',$s));
