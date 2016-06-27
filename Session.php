@@ -29,7 +29,7 @@ class Session{
     protected $baseHref;
 	protected $suffixHref;
 	protected $server;
-	protected $bruteforceProtection;
+	protected $disableBruteforceProtection;
 	function __construct(
 		$name,
 		$cookieLifetime=0,
@@ -37,7 +37,7 @@ class Session{
 		$saveRoot = null,
 		SessionHandlerInterface $sessionHandler = null,
 		$server=null,
-		$bruteforceProtection=true
+		$disableBruteforceProtection=false
 	){
 		$this->name = $name;
 		$this->saveRoot = rtrim($saveRoot,'/').'/';
@@ -46,7 +46,7 @@ class Session{
 		if(!$server)
 			$server = &$_SERVER;
 		$this->server = $server;
-		$this->bruteforceProtection = $bruteforceProtection;
+		$this->disableBruteforceProtection = $disableBruteforceProtection;
 		$this->cookiePath = $this->getSuffixHref();
 		//$this->cookieDomain = $this->getServerHref();
 		$this->cookieDomain = null;
@@ -251,7 +251,7 @@ class Session{
 		$this->cookieLifetime = $time;
 	}
 	function checkBlocked(){
-		if($this->bruteforceProtection&&($s=$this->isBlocked())){
+		if(!$this->disableBruteforceProtection&&($s=$this->isBlocked())){
 			$this->removeCookie($this->name,$this->cookiePath,$this->cookieDomain,false,true);
 			$this->reset();
 			throw new SecurityException(sprintf('Too many failed session open or login submit. Are you trying to bruteforce me ? Wait for %d seconds',$s));
@@ -298,6 +298,8 @@ class Session{
 		return file_put_contents($this->attemptsPath.$ip,$attempt_count,LOCK_EX);
 	}
 	function isBlocked(){
+		if($this->disableBruteforceProtection)
+			return false;
 		$ip = $this->getIpHash();
 		if(is_file($this->attemptsPath.$ip))
 			$count = (int)file_get_contents($this->attemptsPath.$ip);
