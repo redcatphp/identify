@@ -75,7 +75,7 @@ class Session{
 			
 			$lock = $this->savePath.$this->key.'.lock';
 			while(file_exists($lock)){
-				if(($mt=filemtime($lock))&&$mt+10<time())
+				if(($mt=@filemtime($lock))&&$mt+10<time())
 					@unlink($lock);
 				else
 					sleep(.5);
