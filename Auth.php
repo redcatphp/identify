@@ -67,6 +67,7 @@ class Auth{
 	const ERROR_ALREADY_ACTIVATED = 34;
 	const ERROR_ACTIVATION_EXISTS = 35;
 	const ERROR_UNABLE_SEND_ACTIVATION = 36;
+	const ERROR_EMAIL_REGISTERING = 37;
 	const OK = 100;
 	const OK_PASSWORD_CHANGED = 101;
 	const OK_EMAIL_CHANGED = 102;
@@ -343,6 +344,9 @@ class Auth{
 		if($password!==$repeatpassword){
 			return self::ERROR_PASSWORD_NOMATCH;
 		}
+		if($this->isEmailRegistering($email)){
+			return self::ERROR_EMAIL_REGISTERING;
+		}
 		if($this->isEmailTaken($email)){
 			$this->Session->addAttempt();
 			return self::ERROR_EMAIL_TAKEN;
@@ -418,6 +422,10 @@ class Auth{
 		}
 		$this->Session->set('_AUTH_',$auth);
 		return true;
+	}
+	private function isEmailRegistering($email){
+		if($this->db[$this->tableUsers]->exists())
+			return (bool)$this->db->getCell('SELECT id FROM '.$this->db->escTable($this->tableUsers).' WHERE email = ? AND active < 1',[$email]);
 	}
 	private function isEmailTaken($email){
 		if($this->db[$this->tableUsers]->exists())
