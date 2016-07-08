@@ -480,9 +480,6 @@ class Auth{
 		return self::OK_ACCOUNT_DELETED;
 	}
 	private function addRequest($uid, $email, $type){
-		if($type != "activation" && $type != "reset"){
-			return self::ERROR_SYSTEM_ERROR;
-		}
 		$row = $this->db->findOne($this->tableRequests,$this->db->esc($this->tableUsers.'_id').' = ? AND type = ?',[$uid, $type]);
 		if($row){
 			$this->deleteRequest($row->id);
@@ -506,9 +503,28 @@ class Auth{
 		catch(\Exception $e){
 			return self::ERROR_SYSTEM_ERROR;
 		}
-		if(!$this->sendMail($email, $type, $key, isset($user->name)?$user->name:null)){
-			return self::ERROR_SYSTEM_ERROR;
+		
+		$this->postProcess(function()use($email, $type, $key, $user){
+			$this->sendMail($email, $type, $key, isset($user->name)?$user->name:null);
+		});
+	}
+	private function postProcess($callback){
+		if($this->debug){
+			register_shutdown_function($callback);
+			return;
 		}
+		
+		register_shutdown_function(function()use($callback){			
+			$size = ob_get_length();
+			header("Connection: close");
+			header("Content-Encoding: none");
+			header("Content-Length: {$size}");
+			ob_end_flush();
+			ob_flush();
+			flush();
+			
+			call_user_func($callback);
+		});
 	}
 	private function getRequest($key, $type){
 		$row = $this->db->findOne($this->tableRequests,' rkey = ? AND type = ?',[$key, $type]);
