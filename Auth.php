@@ -514,10 +514,10 @@ class Auth{
 			return;
 		}
 		
+		header("Content-Encoding: none");
+		header("Connection: close");
 		register_shutdown_function(function()use($callback){			
 			$size = ob_get_length();
-			header("Connection: close");
-			header("Content-Encoding: none");
 			header("Content-Length: {$size}");
 			ob_end_flush();
 			ob_flush();
