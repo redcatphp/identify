@@ -330,6 +330,7 @@ class Auth{
 	}
 
 	function register($email, $login, $password, $repeatpassword, $name=null){
+		ob_start();
 		if ($s=$this->Session->isBlocked()){
 			return [self::ERROR_USER_BLOCKED,$s];
 		}
@@ -385,6 +386,7 @@ class Auth{
 		return self::OK_ACCOUNT_ACTIVATED;
 	}
 	function requestReset($email){
+		ob_start();
 		if ($s=$this->Session->isBlocked()){
 			return [self::ERROR_USER_BLOCKED,$s];
 		}
@@ -619,6 +621,7 @@ class Auth{
 		return self::OK_PASSWORD_RESET;
 	}
 	function resendActivation($email){
+		ob_start();
 		if ($s=$this->Session->isBlocked()){
 			return [self::ERROR_USER_BLOCKED,$s];
 		}
