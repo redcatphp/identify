@@ -597,7 +597,7 @@ class Auth{
 			return self::ERROR_NEWPASSWORD_NOMATCH;
 		}
 		$data = $this->getRequest($key, 'reset');
-		if(!is_array($data))
+		if(empty($data))
 			return self::ERROR_RESETKEY_INVALID;
 			
 		$user = $this->getUser($data[$this->tableUsers.'_id']);
