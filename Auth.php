@@ -814,6 +814,6 @@ function includeOutput(){
 	if(func_num_args()>1)
 		extract(func_get_arg(1));
 	ob_start();
-	include func_get_arg(0);
+	include REDCAT_CWD.func_get_arg(0);
 	return ob_get_clean();
 }
