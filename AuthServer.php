@@ -292,7 +292,7 @@ class AuthServer{
 	function getMessage($code,$lg=0,$widget=false){
 		if(!isset($this->messages)){
 			if(!$lg) $lg = 'en';
-			$this->messages = include(__DIR__.'/AuthServer.messages.'.$lang.'.php');
+			$this->messages = include(__DIR__.'/AuthServer.messages.'.$lg.'.php');
 		}
 		if(is_array($code)){
 			$c = array_shift($code);
