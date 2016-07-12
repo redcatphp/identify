@@ -626,7 +626,7 @@ class Auth{
 			return [self::ERROR_USER_BLOCKED,$s];
 		}
 		if($e=$this->validateEmail($email))
-			return $r;
+			return $e;
 		$row = $this->db->findOne($this->tableUsers,' email = ?',[$email]);
 		if(!$row){
 			$this->Session->addAttempt();
@@ -661,7 +661,7 @@ class Auth{
 			return self::ERROR_SYSTEM_ERROR;
 		}
 		$newpass = $this->getHash($newpass);
-		if(!($password&&password_verify($currpass, $user->password))){
+		if(!($currpass&&password_verify($currpass, $user->password))){
 			$this->Session->addAttempt();
 			return self::ERROR_PASSWORD_INCORRECT;
 		}
