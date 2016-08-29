@@ -530,7 +530,9 @@ class Auth{
 			$size = ob_get_length();
 			header("Content-Length: {$size}");
 			ob_end_flush();
-			ob_flush();
+			if(ob_get_length()){
+				ob_flush();
+			}
 			flush();
 			
 			call_user_func($callback);
