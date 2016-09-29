@@ -195,7 +195,7 @@ class Session{
 	}
 	function autoRegenerateId(){
 		$now = time();
-		$mtime = filemtime($this->serverFile());
+		$mtime = @filemtime($this->serverFile());
 		if($now>$mtime+$this->maxLifetime){
 			$this->destroy();
 			$this->reset();
