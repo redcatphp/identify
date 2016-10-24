@@ -10,9 +10,9 @@
  */
 namespace RedCat\Identify;
 
-use RedCat\Ding\Di;
-use RedCat\DataMap\B;
-use RedCat\DataMap\DataSource;
+use RedCat\Strategy\Di;
+use FoxORM\B;
+use FoxORM\DataSource;
 if (version_compare(phpversion(), '5.5.0', '<')){
 	require_once __DIR__.'/password-compat.inc.php';
 }

@@ -18,16 +18,13 @@
 		"phpseclib/phpseclib": "^2.0",
 		"ircmaxell/random-lib": "^1.1",
 		"phpmailer/phpmailer": "^6.0.0rc2",
-		"redcatphp/ding": "dev-master",
-		"redcatphp/datamap": "dev-master"
+		"redcatphp/strategy": "dev-master",
+		"foxorm/foxorm": "dev-master"
 	},
 	"autoload": {
 		"psr-4":{
 			"RedCat\\Identify\\": ""
 		}
 	},
-	"minimum-stability": "dev",
-	"suggest": {
-		"redcatphp/datamap": "Allows to use a database instead or in addition of a single configured user"
-	}
+	"minimum-stability": "dev"
 }
