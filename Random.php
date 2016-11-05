@@ -3,6 +3,9 @@ namespace RedCat\Identify;
 use RandomLib\Factory as RandomLibFactory;
 class Random{
 	static function getString($length=40){
+		if(function_exists('random_bytes')){
+			return bin2hex(random_bytes($length));
+		}
 		return self::hex2setstring(bin2hex((new RandomLibFactory())->getMediumStrengthGenerator()->generate($length)));
 	}
 	static function hex2setstring($hex){
