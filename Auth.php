@@ -180,7 +180,7 @@ class Auth{
 			else
 				$message = "Password reset request : <strong><a href=\"{$this->siteUrl}{$this->siteResetUri}?key={$key}\">Reset my password</a></strong>";
 		}
-		$mailer = $this->di->create(PHPMailer::class);
+		$mailer = $this->di->get(PHPMailer::class);
 		return $mailer->mail([$email=>$login],$subject,$message);
 	}
 	function loginRoot($password,$lifetime=0){
@@ -219,7 +219,7 @@ class Auth{
 			if(!$id){
 				try{
 					$user = $this->db
-						->create($this->tableUsers,[
+						->get($this->tableUsers,[
 							'login'=>$this->rootLogin,
 							'name'=>isset($this->rootName)?$this->rootName:$this->rootLogin,
 							'email'=>isset($this->rootEmail)?$this->rootEmail:null,
@@ -260,7 +260,7 @@ class Auth{
 			$user = $this->db->findOne($this->tableUsers,' email = ? AND type = ?',[$email,'persona']);
 			if(!$user){
 				try{
-					$user = $this->db->create($this->tableUsers,$userDefault);
+					$user = $this->db->get($this->tableUsers,$userDefault);
 				}
 				catch(\Exception $e){
 					return self::ERROR_SYSTEM_ERROR;
@@ -440,7 +440,7 @@ class Auth{
 	private function addUser($email, $password, $login=null, $name=null){
 		$password = $this->getHash($password);
 		try{
-			$row = $this->db->create($this->tableUsers,[				
+			$row = $this->db->get($this->tableUsers,[				
 				'login' => $login,
 				'name' => $name,
 				'email' => $email,
