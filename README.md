@@ -1,4 +1,6 @@
- Identify
+**No longer actively maintained.**
+
+Identify
 =========
 
  Identify is a complete authentication system with session management and cryptographic libraries. It including many third-party library.
